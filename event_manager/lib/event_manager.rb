@@ -6,6 +6,16 @@ def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5, "0")[0..4]
 end
 
+def clean_phone(phone)
+  phone = phone.to_s.gsub(/\D/, '')
+  bad_no = "0000000000"
+  if (phone.length) < 10 || (phone.length == 11 && phone[0] != "1") || (phone.length > 11)
+    bad_no
+  else
+    phone.rjust(11,"0")[1..11]
+  end
+end
+
 def legislators_by_zipcode(zipcode)
   civic_info = Google::Apis::CivicinfoV2::CivicInfoService.new
   civic_info.key = 'AIzaSyClRzDqDh5MsXwnCWi0kOiiBivP6JsSyBw'
@@ -27,7 +37,7 @@ end
 def save_thank_you_letters(id, form_letter)
   Dir.mkdir("output") unless Dir.exists? "output"
   
-  filename = "output/thanks+#{id}.html"
+  filename = "output/thanks_#{id}.html"
   
   File.open(filename, 'w') do |file|
     file.puts form_letter
@@ -46,11 +56,14 @@ contents.each do |row|
   name = row[:first_name]
   
   zipcode = clean_zipcode(row[:zipcode])
+
+  phone = clean_phone(row[:homephone])
+
   
   legislators = legislators_by_zipcode(zipcode)
   
   form_letter = erb_template.result(binding)
-  save_thank_you_letters(id, form_letter)
+  #save_thank_you_letters(id, form_letter)
   
   #puts form_letter
 end
