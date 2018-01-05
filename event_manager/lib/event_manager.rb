@@ -18,11 +18,12 @@ end
 
 def parse_hours(regdate, hours)
   regdate = DateTime.strptime(regdate, "%m/%d/%y %k:%M")
-
   hours[regdate.hour - 1] += 1
-  
-  
+end
 
+def parse_days(regdate, days)
+  regdate = DateTime.strptime(regdate, "%m/%d/%y %k:%M")
+  days[regdate.wday - 1] += 1
 end
 
 def legislators_by_zipcode(zipcode)
@@ -57,6 +58,7 @@ puts "EventManager Initialized!"
 
 contents = CSV.open "event_attendees.csv", headers: true, header_converters: :symbol
 hours = Array.new(24, 0)
+days = Array.new(7, 0)
 template_letter = File.read "form_letter.erb"
 erb_template = ERB.new template_letter
 
@@ -70,6 +72,7 @@ contents.each do |row|
   phone = clean_phone(row[:homephone])
   
   pHours = parse_hours(row[:regdate], hours)
+  pDays = parse_days(row[:regdate], days)
   
   legislators = legislators_by_zipcode(zipcode)
   
@@ -80,3 +83,6 @@ contents.each do |row|
 end
 puts "Hours: 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24".rjust(80)
 puts "Signups: #{hours.to_s}".rjust(80)
+
+puts "Days:    Mon Tues Wed Thurs Fri Sat Sun".rjust(30)
+puts "Signups: #{days[0]}   #{days[1]}    #{days[2]}   #{days[3]}     #{days[4]}   #{days[5]}   #{days[6]} "
